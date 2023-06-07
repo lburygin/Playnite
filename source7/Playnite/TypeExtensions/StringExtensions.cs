@@ -328,12 +328,22 @@ namespace System
 
         public static string EndWithDirSeparator(this string source)
         {
-            if (source.IsNullOrEmpty())
+            if (source.IsNullOrEmpty() || source.EndsWith(Path.DirectorySeparatorChar))
             {
                 return source;
             }
 
-            return source.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            return source += Path.DirectorySeparatorChar;
+        }
+
+        public static string EndWithUriSeparator(this string source)
+        {
+            if (source.IsNullOrEmpty() || source.EndsWith('/'))
+            {
+                return source;
+            }
+
+            return source += '/';
         }
 
         public static bool ContainsInvariantCulture(this string source, string value, CompareOptions compareOptions)
