@@ -91,7 +91,8 @@ public class Serialization
         return JsonSerializer.Serialize(obj, new JsonSerializerOptions
         {
             WriteIndented = formatted,
-            IncludeFields = true
+            IncludeFields = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
         });
     }
 
