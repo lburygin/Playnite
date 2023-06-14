@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
-namespace Playnite;
+﻿namespace Playnite;
 
 /// <summary>
 /// Represents plugin search support.

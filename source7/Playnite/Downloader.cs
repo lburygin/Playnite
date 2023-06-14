@@ -153,17 +153,29 @@ public static class Downloader
         }
     }
 
-    public static async Task<HttpStatusCode> GetResponseCode(string url)
+    public static async Task<(HttpStatusCode statusCode, Dictionary<string, string> headers)> GetResponseCode(string url)
     {
+        var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
         try
         {
-            var response = await httpClient.GetAsync(url);
-            return response.StatusCode;
+            var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+            foreach (var header in response.Headers)
+            {
+                headers.Add(header.Key, string.Join(",", header.Value));
+            }
+
+            foreach (var header in response.Content.Headers)
+            {
+                headers.Add(header.Key, string.Join(",", header.Value));
+            }
+
+            return (response.StatusCode, headers);
         }
         catch (Exception e)
         {
             logger.Error(e, $"Failed to get HTTP response for {url}.");
-            return HttpStatusCode.ServiceUnavailable;
+            return (HttpStatusCode.ServiceUnavailable, headers);
         }
     }
 

@@ -9,6 +9,7 @@ public class ListExtensionsTests
         Assert.IsFalse(((IEnumerable<object>)null!).HasItems());
         Assert.IsFalse(new List<string>().HasItems());
         Assert.IsTrue(new List<string>() { "1" }.HasItems());
+        Assert.IsTrue(new string[] { "1" }.HasItems());
     }
 
     [Test]

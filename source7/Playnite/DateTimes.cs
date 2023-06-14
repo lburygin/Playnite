@@ -93,7 +93,7 @@ public static class DateTimes
         return date.ToString(options.Format ?? DateUiFormat);
     }
 
-    public static string ToDisplayString(this ReleaseDate date, ReleaseDateFormattingOptions? options = null)
+    public static string ToDisplayString(this PartialDate date, ReleaseDateFormattingOptions? options = null)
     {
         if (date.Month == null && date.Day == null)
         {

@@ -197,7 +197,8 @@ IconIndex=0";
                 Path = file.FullName,
                 Icon = file.FullName,
                 WorkDir = Path.GetDirectoryName(file.FullName),
-                Name = programName
+                Name = programName,
+                AppId = filePath.MD5()
             };
         }
         else if (file.Extension?.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase) == true)
@@ -219,7 +220,8 @@ IconIndex=0";
             {
                 Path = file.FullName,
                 Name = Path.GetFileNameWithoutExtension(file.FullName),
-                WorkDir = Path.GetDirectoryName(file.FullName)
+                WorkDir = Path.GetDirectoryName(file.FullName),
+                AppId = filePath.MD5()
             };
         }
 
@@ -245,7 +247,8 @@ IconIndex=0";
             Arguments = link.Arguments,
             WorkDir = link.WorkingDirectory,
             Name = link.Name,
-            Icon = link.TargetPath
+            Icon = link.TargetPath,
+            AppId = lnkPath.MD5()
         };
 
         if (!link.IconLocation.RawValue.IsNullOrWhiteSpace())
@@ -340,7 +343,8 @@ IconIndex=0";
                     Path = target,
                     Icon = link.Icon,
                     Name = Path.GetFileNameWithoutExtension(shortcut.Name),
-                    WorkDir = link.WorkDir
+                    WorkDir = link.WorkDir,
+                    AppId = path.MD5()
                 };
 
                 apps.Add(app);

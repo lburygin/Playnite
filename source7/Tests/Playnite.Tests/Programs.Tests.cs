@@ -20,10 +20,10 @@ public class ProgramsTests
     [Test]
     public async Task GetExecutablesFromFolderTest()
     {
-        var apps = await Programs.GetExecutablesFromFolder(PlaynitePaths.ProgramDir, System.IO.SearchOption.AllDirectories, CancellationToken.None);
+        var apps = await Programs.GetExecutablesFromFolder(PlaynitePaths.ProgramDir, SearchOption.AllDirectories, CancellationToken.None);
         Assert.That(apps.Count, Is.GreaterThan(0));
 
-        var firstApp = apps.First();
+        var firstApp = apps.First(a => a.Path!.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
         Assert.IsFalse(string.IsNullOrEmpty(firstApp.Icon));
         Assert.IsFalse(string.IsNullOrEmpty(firstApp.Name));
         Assert.IsFalse(string.IsNullOrEmpty(firstApp.Path));

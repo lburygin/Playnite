@@ -27,6 +27,11 @@ public static class ListExtensions
     /// <returns></returns>
     public static bool HasItems<T>([NotNullWhen(true)] this IEnumerable<T>? source)
     {
+        if (source is IList<T> list)
+        {
+            return list?.Count > 0;
+        }
+
         return source?.Any() == true;
     }
 
@@ -171,11 +176,11 @@ public static class ListExtensions
     /// <summary>
     /// Checks if two collections contain the same items in any order.
     /// </summary>
-    public static bool IsListEqual<T>([NotNullWhen(true)] this IEnumerable<T> source, [NotNullWhen(true)] IEnumerable<T> target)
+    public static bool IsListEqual<T>([NotNullWhen(true)] this IList<T> source, [NotNullWhen(true)] IList<T> target)
     {
         if (source != null && target != null)
         {
-            if (source.Count() != target.Count())
+            if (source.Count != target.Count)
             {
                 return false;
             }
@@ -199,11 +204,11 @@ public static class ListExtensions
     /// <summary>
     /// Checks if two collections contain the same items in any order.
     /// </summary>
-    public static bool IsListEqual<T>([NotNullWhen(true)] this IEnumerable<T> source, [NotNullWhen(true)] IEnumerable<T> target, IEqualityComparer<T> comparer)
+    public static bool IsListEqual<T>([NotNullWhen(true)] this IList<T> source, [NotNullWhen(true)] IList<T> target, IEqualityComparer<T> comparer)
     {
         if (source != null && target != null)
         {
-            if (source.Count() != target.Count())
+            if (source.Count != target.Count)
             {
                 return false;
             }
@@ -227,11 +232,11 @@ public static class ListExtensions
     /// <summary>
     /// Checks if two collections contain the same items in the same order.
     /// </summary>
-    public static bool IsListEqualExact<T>([NotNullWhen(true)] this IEnumerable<T> source, [NotNullWhen(true)] IEnumerable<T> target)
+    public static bool IsListEqualExact<T>([NotNullWhen(true)] this IList<T> source, [NotNullWhen(true)] IList<T> target)
     {
         if (source != null && target != null)
         {
-            if (source.Count() != target.Count())
+            if (source.Count != target.Count)
             {
                 return false;
             }
@@ -245,17 +250,16 @@ public static class ListExtensions
     /// <summary>
     /// Check if collection contains all items from other collection (in any order).
     /// </summary>
-    public static bool Contains<T>([NotNullWhen(true)] this IEnumerable<T> source, [NotNullWhen(true)] IEnumerable<T> target)
+    public static bool Contains<T>([NotNullWhen(true)] this IList<T> source, [NotNullWhen(true)] IList<T> target)
     {
         if (source != null && target != null)
         {
-            var targetCount = target.Count();
-            if (targetCount > source.Count())
+            if (target.Count > source.Count)
             {
                 return false;
             }
 
-            return target.Intersect(source).Count() == targetCount;
+            return target.Intersect(source).Count() == target.Count;
         }
 
         return false;
@@ -323,6 +327,36 @@ public static class ListExtensions
         return GetDistinctItems(lists.ToList());
     }
 
+    public static bool AddRange<T>(this HashSet<T> source, IEnumerable<T>? toAdd)
+    {
+        if (toAdd is null)
+        {
+            return false;
+        }
+
+        var anyAdded = false;
+        foreach (var item in toAdd)
+        {
+            if (source.Add(item))
+            {
+                anyAdded = true;
+            }
+        }
+
+        return anyAdded;
+    }
+
+    public static HashSet<T> Merge<T>(params HashSet<T>?[] lists)
+    {
+        var allItems = new HashSet<T>();
+        foreach (var list in lists)
+        {
+            allItems.AddRange(list);
+        }
+
+        return allItems;
+    }
+
     /// <summary>
     /// Merge collections together.
     /// </summary>
@@ -350,11 +384,11 @@ public static class ListExtensions
     /// <param name="list1"></param>
     /// <param name="list2"></param>
     /// <returns></returns>
-    public static List<T> Merge<T>(IEnumerable<T> list1, IEnumerable<T> list2)
+    public static List<T> Merge<T>(IList<T> list1, IList<T> list2)
     {
         if (list1.HasItems() && list2.HasItems())
         {
-            var allItems = new List<T>(list1.Count() + list2.Count());
+            var allItems = new List<T>(list1.Count + list2.Count);
             allItems.AddRange(list1);
             allItems.AddRange(list2);
             return allItems;
@@ -369,25 +403,6 @@ public static class ListExtensions
         }
 
         return new List<T>();
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="source"></param>
-    /// <param name="action"></param>
-    public static void ForEach<T>(this ObservableCollection<T> source, Action<T> action)
-    {
-        if (source.HasItems() != true)
-        {
-            return;
-        }
-
-        foreach (var item in source)
-        {
-            action(item);
-        }
     }
 
     /// <summary>

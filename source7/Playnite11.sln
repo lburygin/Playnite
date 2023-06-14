@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProcessRunTester", "Tests\P
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{CD0684C0-5318-4B12-A284-26A0BE659BE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FtlGenerator", "Utils\FtlGenerator\FtlGenerator.csproj", "{4E6FB012-398E-40BC-9A14-14AD89D77532}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FtlGenerator", "Utils\FtlGenerator\FtlGenerator.csproj", "{4E6FB012-398E-40BC-9A14-14AD89D77532}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGenerators", "Utils\SourceGenerators\SourceGenerators.csproj", "{98B7B881-9942-4DEF-BEDE-CBE5AA2ABB1A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +45,10 @@ Global
 		{4E6FB012-398E-40BC-9A14-14AD89D77532}.Debug|x64.Build.0 = Debug|Any CPU
 		{4E6FB012-398E-40BC-9A14-14AD89D77532}.Release|x64.ActiveCfg = Release|Any CPU
 		{4E6FB012-398E-40BC-9A14-14AD89D77532}.Release|x64.Build.0 = Release|Any CPU
+		{98B7B881-9942-4DEF-BEDE-CBE5AA2ABB1A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{98B7B881-9942-4DEF-BEDE-CBE5AA2ABB1A}.Debug|x64.Build.0 = Debug|Any CPU
+		{98B7B881-9942-4DEF-BEDE-CBE5AA2ABB1A}.Release|x64.ActiveCfg = Release|Any CPU
+		{98B7B881-9942-4DEF-BEDE-CBE5AA2ABB1A}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +57,7 @@ Global
 		{C2F12C79-F837-4A62-8552-F3FBA0A8C14D} = {A1210ACC-6A4B-4C63-838F-E3C511B2D2F5}
 		{F0DB6745-97EB-4B74-B82C-1234E22E96D3} = {A1210ACC-6A4B-4C63-838F-E3C511B2D2F5}
 		{4E6FB012-398E-40BC-9A14-14AD89D77532} = {CD0684C0-5318-4B12-A284-26A0BE659BE7}
+		{98B7B881-9942-4DEF-BEDE-CBE5AA2ABB1A} = {CD0684C0-5318-4B12-A284-26A0BE659BE7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A8A35C1A-226D-4635-A071-D45BED24FB88}

@@ -10,8 +10,11 @@ public partial class DatabaseObject : ObservableObject
     /// <summary>
     /// Gets or sets identifier of database object.
     /// </summary>
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
+    /// <summary>
+    /// Gets or sets name.
+    /// </summary>
     [ObservableProperty] private string? name;
 
     /// <summary>
@@ -19,38 +22,20 @@ public partial class DatabaseObject : ObservableObject
     /// </summary>
     public DatabaseObject()
     {
-        Id = Guid.NewGuid();
+    }
+
+    /// <summary>
+    /// Creates new instance of <see cref="DatabaseObject"/>.
+    /// </summary>
+    /// <param name="name"></param>
+    public DatabaseObject(string name) : base()
+    {
+        Name = name;
     }
 
     /// <inheritdoc/>
     public override string? ToString()
     {
         return Name ?? string.Empty;
-    }
-
-    /// <summary>
-    /// Copies differential properties to target object intance.
-    /// </summary>
-    /// <param name="target">Target object instance to receive new data.</param>
-    public virtual void CopyDiffTo(object target)
-    {
-        ArgumentNullException.ThrowIfNull(target);
-
-        if (ReferenceEquals(this, target))
-        {
-            throw new Exception("Cannot copy data to itself.");
-        }
-
-        if (target is DatabaseObject dbo)
-        {
-            if (!string.Equals(Name, dbo.Name, StringComparison.Ordinal))
-            {
-                dbo.Name = Name;
-            }
-        }
-        else
-        {
-            throw new Exception($"Target object has to be of type {GetType().Name}");
-        }
     }
 }

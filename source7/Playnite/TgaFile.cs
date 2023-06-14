@@ -28,6 +28,23 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 
+#pragma warning disable IDE0018
+#pragma warning disable IDE0090
+#pragma warning disable IDE0041
+#pragma warning disable IDE0038
+#pragma warning disable CA2208
+#pragma warning disable IDE0075
+#pragma warning disable IDE0016
+#pragma warning disable IDE0056
+#pragma warning disable IDE0057
+#pragma warning disable IDE0017
+#pragma warning disable IDE0031
+#pragma warning disable IDE0063
+#pragma warning disable IDE0054
+#pragma warning disable CA2241
+#pragma warning disable CA1822
+#pragma warning disable CA1846
+
 #nullable disable
 namespace TGASharpLib
 {

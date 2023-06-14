@@ -98,6 +98,16 @@ public class StringExtensionsTests
     }
 
     [Test]
+    public void EndWithUriSeparatorTest()
+    {
+        Assert.AreEqual(@"", "".EndWithUriSeparator());
+        Assert.IsNull(((string)null!).EndWithUriSeparator());
+        Assert.AreEqual(@"test/", "test".EndWithUriSeparator());
+        Assert.AreEqual(@"test/", @"test/".EndWithUriSeparator());
+        Assert.AreEqual(@"test/", @"test///".EndWithUriSeparator());
+    }
+
+    [Test]
     public void UriCombineTest()
     {
         Assert.AreEqual("https://test.domain.com/seg1/seg2", "https://test.domain.com/".UriCombine("/seg1", "/seg2"));

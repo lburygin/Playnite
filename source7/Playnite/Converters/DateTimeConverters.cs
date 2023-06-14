@@ -77,7 +77,7 @@ public class ReleaseDateToStringConverter : MarkupExtension, IValueConverter
 
     public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
     {
-        if (value is ReleaseDate date)
+        if (value is PartialDate date)
         {
             if (parameter is ReleaseDateFormattingOptions options)
             {
@@ -104,7 +104,7 @@ public class ReleaseDateToStringConverter : MarkupExtension, IValueConverter
             return null;
         }
 
-        return ReleaseDate.Deserialize(str);
+        return PartialDate.Deserialize(str);
     }
 
     public override object ProvideValue(IServiceProvider serviceProvider)
@@ -117,7 +117,7 @@ public class EditingReleaseDateToStringConverter : MarkupExtension, IValueConver
 {
     public object? Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
     {
-        if (value is ReleaseDate date)
+        if (value is PartialDate date)
         {
             return date.Serialize();
         }
@@ -129,7 +129,7 @@ public class EditingReleaseDateToStringConverter : MarkupExtension, IValueConver
     {
         if (value is string str)
         {
-            return ReleaseDate.Deserialize(str);
+            return PartialDate.Deserialize(str);
         }
 
         throw new NotSupportedException();
@@ -149,7 +149,7 @@ public class ReleaseDateFieldValidation : ValidationRule
     {
         if (value is string str && !str.IsNullOrWhiteSpace())
         {
-            if (ReleaseDate.TryDeserialize(str, out var _))
+            if (PartialDate.TryDeserialize(str, out var _))
             {
                 return new ValidationResult(true, null);
             }

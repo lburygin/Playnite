@@ -9,8 +9,12 @@ public class DownloaderTests
     [Test]
     public async Task GetResponseCodeTest()
     {
-        Assert.AreEqual(HttpStatusCode.OK, await Downloader.GetResponseCode(@"https://playnite.link/favicon.ico"));
-        Assert.AreEqual(HttpStatusCode.NotFound, await Downloader.GetResponseCode(@"https://playnite.link/test.tst"));
+        var resp = await Downloader.GetResponseCode(@"https://playnite.link/favicon.ico");
+        Assert.AreEqual(HttpStatusCode.OK, resp.statusCode);
+        Assert.AreEqual("15086", resp.headers["Content-Length"]);
+
+        resp = await Downloader.GetResponseCode(@"https://playnite.link/test.tst");
+        Assert.AreEqual(HttpStatusCode.NotFound, resp.statusCode);
     }
 
     [Test]

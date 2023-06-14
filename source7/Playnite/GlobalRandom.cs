@@ -2,32 +2,32 @@
 
 public class GlobalRandom
 {
-    private static readonly Random generator = new Random();
+    public static readonly Random Generator = new Random();
     private static readonly string randomStringChars = "ABCDEFGHIJKLMNOPQRSTYVWXZabcdefghijklmnopqrstyvwxz0123456789";
 
     public static int Next()
     {
-        return generator.Next();
+        return Generator.Next();
     }
 
     public static int Next(int minValue, int maxValue)
     {
-        return generator.Next(minValue, maxValue);
+        return Generator.Next(minValue, maxValue);
     }
 
     public static int Next(int maxValue)
     {
-        return generator.Next(maxValue);
+        return Generator.Next(maxValue);
     }
 
     public static void NextBytes(byte[] buffer)
     {
-        generator.NextBytes(buffer);
+        Generator.NextBytes(buffer);
     }
 
     public static double NextDouble()
     {
-        return generator.NextDouble();
+        return Generator.NextDouble();
     }
 
     public static DateTime GetRandomDateTime()
@@ -46,11 +46,11 @@ public class GlobalRandom
 
         var randomSetLeng = randomStringChars.Length - 1;
         var result = new StringBuilder(length);
-        lock (generator)
+        lock (Generator)
         {
             for (int i = 0; i < length; i++)
             {
-                result.Append(randomStringChars[generator.Next(0, randomSetLeng)]);
+                result.Append(randomStringChars[Generator.Next(0, randomSetLeng)]);
             }
 
             return result.ToString();

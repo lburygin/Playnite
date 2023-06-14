@@ -132,20 +132,9 @@ public class Paths
         return Path.GetFullPath(formatted).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).ToUpperInvariant();
     }
 
-    public static bool AreEqual(string path1, string path2)
+    public static bool AreEqual(string? path1, string? path2)
     {
-        if (string.IsNullOrEmpty(path1) && !string.IsNullOrEmpty(path2))
-        {
-            return false;
-        }
-
-        if (!string.IsNullOrEmpty(path1) && string.IsNullOrEmpty(path2))
-        {
-            return false;
-        }
-
-        // Empty string is not valid path, return false even when both are null
-        if (string.IsNullOrEmpty(path1) && string.IsNullOrEmpty(path2))
+        if (string.IsNullOrEmpty(path1) || string.IsNullOrEmpty(path2))
         {
             return false;
         }

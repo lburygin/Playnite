@@ -1271,3 +1271,11 @@ db-corruption-crash-message =
     Library file corruption has been detected, Playnite will now shutdown.
         
     Open new issue on Playnite's GitHub page with a request to fix corruption in your files.
+completion-not-played = Not Played
+completion-played = Played
+completion-beaten = Beaten
+completion-completed = Completed
+completion-playing = Playing
+completion-abandoned = Abandoned
+completion-on-hold = On Hold
+completion-plan-to-play = Plan to Play

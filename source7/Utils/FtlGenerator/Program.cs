@@ -1,9 +1,12 @@
-﻿using Linguini.Bundle.Builder;
+﻿using Linguini.Bundle;
+using Linguini.Bundle.Builder;
 using Linguini.Bundle.Resolver;
 using Linguini.Shared.Types.Bundle;
 using Linguini.Syntax.Ast;
 using Linguini.Syntax.Parser;
+using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace FtlGenerator;
 
@@ -75,12 +78,21 @@ internal class Program
             """);
 
         sb.AppendLine();
+
+        (var bundle, var errors) = LinguiniBuilder.Builder().
+            CultureInfo(new CultureInfo("en-US")).
+            AddResource(File.ReadAllText(ftlPath)).
+            Build();
+
         foreach (var str in strings.Keys)
         {
             var vars = strings[str];
             if (vars?.Any() == true)
             {
                 sb.AppendLine($$"""
+                        /// <summary>
+                        /// {{GetLocMessage(str, bundle)}}
+                        /// </summary>
                         public static string {{str.Replace('-', '_')}}({{string.Join(", ", vars.Select(a => $"object {a.Replace('-', '_')}"))}})
                         {
                             return GetString("{{str}}", {{string.Join(", ", vars.Select(a => $"(\"{a}\", {a.Replace('-', '_')})"))}});
@@ -90,6 +102,9 @@ internal class Program
             else
             {
                 sb.AppendLine($$"""
+                        /// <summary>
+                        /// {{GetLocMessage(str, bundle)}}
+                        /// </summary>
                         public static string {{str.Replace('-', '_')}}()
                         {
                             return GetString("{{str}}");
@@ -116,10 +131,26 @@ internal class Program
         sb.AppendLine();
         foreach (var str in strings.Keys)
         {
-            sb.AppendLine($"    public const string {str.Replace('-', '_')} = \"{str}\";");
+            sb.AppendLine($$"""
+                        /// <summary>
+                        /// {{GetLocMessage(str, bundle)}}
+                        /// </summary>
+                        public const string {{str.Replace('-', '_')}} = "{{str}}";
+                    """);
         }
 
         sb.AppendLine("}");
         File.WriteAllText(@"c:\Devel\Playnite\source7\PlayniteSDK\Localization.generated.cs", sb.ToString());
+    }
+
+    private static string GetLocMessage(string id, FluentBundle bundle)
+    {
+        bundle.TryGetMessage(id, null, out var _, out var locString);
+        if (locString is null)
+        {
+            return id;
+        }
+
+        return Regex.Replace(locString, "\n", "\n    /// ");
     }
 }

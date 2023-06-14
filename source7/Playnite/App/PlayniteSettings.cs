@@ -479,7 +479,7 @@ public partial class FullscreenSettings : ObservableObject
 
     partial void OnFullscreenItemSpacingChanged(int value)
     {
-        double marginX = FullscreenItemSpacing / 2;
+        double marginX = FullscreenItemSpacing / 2.0;
         double marginY = CoverAspectRatio.GetWidth(FullscreenItemSpacing) / 2;
         FullscreenItemSpacingMargin = new Thickness(marginY / 2, marginX / 2, marginY / 2, marginX / 2);
         OnPropertyChanged(nameof(FullscreenItemSpacingMargin));
@@ -582,9 +582,9 @@ public partial class PlayniteSettings : ObservableObject
     [ObservableProperty] private bool installSizeScanUseSizeOnDisk = true;
     [ObservableProperty] private bool scanLibInstallSizeOnLibUpdate = true;
     [ObservableProperty] private bool updateNotificationOnPatchesOnly = false;
-    [ObservableProperty] private string webImageSarchIconTerm = "{Name} icon";
-    [ObservableProperty] private string webImageSarchCoverTerm = "{Name} cover";
-    [ObservableProperty] private string webImageSarchBackgroundTerm = "{Name} wallpaper";
+    [ObservableProperty] private string webImageSarchIconTerm = "\"{Name}\" icon";
+    [ObservableProperty] private string webImageSarchCoverTerm = "\"{Name}\" cover";
+    [ObservableProperty] private string webImageSarchBackgroundTerm = "\"{Name}\" wallpaper";
     [ObservableProperty] private bool partialDescriptionLoading = true;
     [ObservableProperty] private SearchWindowVisibilitySettings searchWindowVisibility = new();
     [ObservableProperty] private DetailsVisibilitySettings detailsVisibility = new();
