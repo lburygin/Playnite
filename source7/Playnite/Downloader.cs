@@ -53,9 +53,8 @@ public static class Downloader
         return await resp.Content.ReadAsStringAsync(cancelToken);
     }
 
-    public static async Task<string> DownloadStringAsync(params string[] mirrors)
+    public static async Task<string> DownloadStringAsync(IEnumerable<string> mirrors)
     {
-        logger.Debug($"Downloading string content from multiple mirrors.");
         foreach (var mirror in mirrors)
         {
             try
@@ -71,9 +70,8 @@ public static class Downloader
         throw new Exception("Failed to download string from all mirrors.");
     }
 
-    public static async Task<string> DownloadStringAsync(CancellationToken cancelToken, params string[] mirrors)
+    public static async Task<string> DownloadStringAsync(CancellationToken cancelToken, IEnumerable<string> mirrors)
     {
-        logger.Debug($"Downloading string content from multiple mirrors.");
         foreach (var mirror in mirrors)
         {
             if (cancelToken.IsCancellationRequested)
@@ -112,6 +110,24 @@ public static class Downloader
         resp.EnsureSuccessStatusCode();
         using var fs = new FileStream(path, FileMode.Create);
         await resp.Content.CopyToAsync(fs, cancelToken);
+    }
+
+    public static async Task DownloadFileAsync(IEnumerable<string> mirrors, string path, Action<DownloadProgress> progressHandler, CancellationToken cancelToken)
+    {
+        foreach (var mirror in mirrors)
+        {
+            try
+            {
+                await DownloadFileAsync(mirror, path, progressHandler,  cancelToken);
+                return;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e, $"Failed to download {mirror} file.");
+            }
+        }
+
+        throw new Exception("Failed to download file from all mirrors.");
     }
 
     public static async Task DownloadFileAsync(string url, string path, Action<DownloadProgress> progressHandler, CancellationToken cancelToken)
@@ -178,22 +194,22 @@ public static class Downloader
             return (HttpStatusCode.ServiceUnavailable, headers);
         }
     }
+}
 
-    public class DownloadProgress
+public class DownloadProgress
+{
+    public long TotalBytes { get; }
+    public long ReadBytes { get; private set; }
+    public int PercentageDone { get; private set; }
+
+    public DownloadProgress(long totalBytes)
     {
-        public long TotalBytes { get; }
-        public long ReadBytes { get; private set; }
-        public int PercentageDone { get; private set; }
+        TotalBytes = totalBytes;
+    }
 
-        public DownloadProgress(long totalBytes)
-        {
-            TotalBytes = totalBytes;
-        }
-
-        internal void Update(long readBytesSum)
-        {
-            ReadBytes = readBytesSum;
-            PercentageDone = Convert.ToInt32(((double)ReadBytes / TotalBytes) * 100);
-        }
+    internal void Update(long readBytesSum)
+    {
+        ReadBytes = readBytesSum;
+        PercentageDone = Convert.ToInt32(((double)ReadBytes / TotalBytes) * 100);
     }
 }

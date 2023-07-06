@@ -1,9 +1,9 @@
+#nullable enable
 namespace Playnite.Tests;
 
 public partial class PlayniteModelsTests
 {
-    [Test]
-    public void GetCopyTests()
+    [Test] public void GetCopyTests()
     {
         GetCopyTest<Game>();
         GetCopyTest<GameVariant>();

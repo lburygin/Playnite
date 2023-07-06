@@ -151,7 +151,7 @@ public static class Diagnostic
             var playnitePath = Path.Combine(diagTemp, "playniteInfo.txt");
             var playniteInfo = new Dictionary<string, object?>
                 {
-                    { "Version", PlayniteVersion.CurrentVersion.ToString() },
+                    { "Version", PlayniteApplication.CurrentVersion.ToString() },
                     { "Portable", PlaynitePaths.IsPortable },
                     { "Memory", (PlayniteProcess.WorkingSetMemory / 1024f) / 1024f },
                     { "Path", PlayniteProcess.Path },

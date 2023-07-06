@@ -1,5 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
 namespace Playnite;
 
 public partial class Dialogs
@@ -42,10 +42,10 @@ public partial class Dialogs
     }
 
     public static MessageBoxOption ShowMessage(
-        string messageBoxText,
-        string caption,
-        MessageBoxImage icon,
-        List<MessageBoxOption> options)
+            string messageBoxText,
+            string caption,
+            MessageBoxImage icon,
+            List<MessageBoxOption> options)
     {
         return DialogsHandler.ShowMessage(messageBoxText, caption, icon, options);
     }
@@ -86,44 +86,44 @@ public partial class Dialogs
     }
 
     public static StringSelectionDialogResult SelectString(
-        string messageBoxText,
-        string caption,
-        string defaultInput)
+            string messageBoxText,
+            string caption,
+            string defaultInput)
     {
         return DialogsHandler.SelectString(messageBoxText, caption, defaultInput);
     }
 
     public static StringSelectionDialogResult SelectString(
-        string messageBoxText,
-        string caption,
-        string defaultInput,
-        List<MessageBoxToggle> options)
+            string messageBoxText,
+            string caption,
+            string defaultInput,
+            List<MessageBoxToggle> options)
     {
         return DialogsHandler.SelectString(messageBoxText, caption, defaultInput, options);
     }
 
     public static void ShowSelectableString(
-        string messageBoxText,
-        string caption,
-        string defaultInput)
+            string messageBoxText,
+            string caption,
+            string defaultInput)
     {
         DialogsHandler.ShowSelectableString(messageBoxText, caption, defaultInput);
     }
 
     public static ImageFileOption ChooseImageFile(
-        List<ImageFileOption> files,
-        string? caption = null,
-        double itemWidth = 240,
-        double itemHeight = 180)
+            List<ImageFileOption> files,
+            string? caption = null,
+            double itemWidth = 240,
+            double itemHeight = 180)
     {
         return DialogsHandler.ChooseImageFile(files, caption, itemWidth, itemHeight);
     }
 
     public static GenericItemOption ChooseItemWithSearch(
-        List<GenericItemOption> items,
-        Func<string, List<GenericItemOption>> searchFunction,
-        string? defaultSearch = null,
-        string? caption = null)
+            List<GenericItemOption> items,
+            Func<string, List<GenericItemOption>> searchFunction,
+            string? defaultSearch = null,
+            string? caption = null)
     {
         return DialogsHandler.ChooseItemWithSearch(items, searchFunction, defaultSearch, caption);
     }

@@ -118,12 +118,7 @@ public static class ObjectExtensions
         PropertyNameCaseInsensitive = false
     };
 
-    /// <summary>
-    /// Perform a deep copy of the object, using Json as a serialisation method.
-    /// </summary>
-    /// <typeparam name="T">The type of object being copied.</typeparam>
-    /// <param name="source">The object instance to copy.</param>
-    /// <returns>The copied object.</returns>
+    [Obsolete("Use Generated GetCopy methods instead")]
     public static T? GetClone<T>(this T source)
     {
         if (source is null)
@@ -134,6 +129,7 @@ public static class ObjectExtensions
         return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(source, jsonSerializerSettings));
     }
 
+    [Obsolete("Use Generated GetCopy methods instead")]
     public static U? GetClone<T, U>(this T source)
     {
         if (source is null)

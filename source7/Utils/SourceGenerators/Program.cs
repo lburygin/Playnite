@@ -65,14 +65,16 @@ internal class Program
     {
         string collectionOutFile = @"c:\Devel\Playnite\source7\Playnite\App\Library_Collections.generated.cs";
         string modelsFile = @"c:\Devel\Playnite\source7\PlayniteSDK\Models\PlayniteModels.cs";
+        string dbobjectFile = @"c:\Devel\Playnite\source7\PlayniteSDK\Models\DatabaseObject.cs";
 
-        var sb = new StringBuilder();
+        var code = new CodeGen();
         var source = File.ReadAllText(modelsFile);
         var tree = CSharpSyntaxTree.ParseText(source);
         var root = tree.GetCompilationUnitRoot();
-        var compilation = CSharpCompilation.Create("GameModelsCompilation")
-            .AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location))
-            .AddSyntaxTrees(tree);
+        var compilation = CSharpCompilation.Create("GameModelsCompilation").
+            AddReferences(MetadataReference.CreateFromFile(typeof(string).Assembly.Location)).
+            AddSyntaxTrees(CSharpSyntaxTree.ParseText(File.ReadAllText(dbobjectFile))).
+            AddSyntaxTrees(tree);
         var model = compilation.GetSemanticModel(tree);
 
         var collectionClasses = new List<CollectionClass>();
@@ -122,29 +124,32 @@ internal class Program
             {
                 var cloneClass = new CollectionClass(node.Identifier.Text);
                 cloneClass.BaseType = node.BaseList?.Types.FirstOrDefault()?.ToString();
-                var typeSymbol = model.Compilation.GetSemanticModel(node.SyntaxTree).GetDeclaredSymbol(node);
+                var tt = model.Compilation.GetSemanticModel(node.SyntaxTree).GetDeclaredSymbol(node);
 
-                foreach (IFieldSymbol field in typeSymbol!.GetMembers().Where(a => a.Kind == SymbolKind.Field))
+                foreach (var typeSymbol in tt!.GetBaseTypesAndThis())
                 {
-                    if (field.Name.Contains("k__BackingField", StringComparison.Ordinal))
+                    foreach (IFieldSymbol field in typeSymbol!.GetMembers().Where(a => a.Kind == SymbolKind.Field))
                     {
-                        continue;
+                        if (field.Name.Contains("k__BackingField", StringComparison.Ordinal))
+                        {
+                            continue;
+                        }
+
+                        cloneClass.Members.Add(new(field.Name, field.Type.ToString()!)
+                        {
+                            IsEnum = field.Type.TypeKind == TypeKind.Enum,
+                            IsNullable = field.Type.NullableAnnotation == NullableAnnotation.Annotated
+                        });
                     }
 
-                    cloneClass.Members.Add(new(field.Name, field.Type.ToString()!)
+                    foreach (IPropertySymbol field in typeSymbol!.GetMembers().Where(a => a.Kind == SymbolKind.Property))
                     {
-                        IsEnum = field.Type.TypeKind == TypeKind.Enum,
-                        IsNullable = field.Type.NullableAnnotation == NullableAnnotation.Annotated
-                    });
-                }
-
-                foreach (IPropertySymbol field in typeSymbol!.GetMembers().Where(a => a.Kind == SymbolKind.Property))
-                {
-                    cloneClass.Members.Add(new(field.Name, field.Type.ToString()!)
-                    {
-                        IsEnum = field.Type.TypeKind == TypeKind.Enum,
-                        IsNullable = field.Type.NullableAnnotation == NullableAnnotation.Annotated
-                    });
+                        cloneClass.Members.Add(new(field.Name, field.Type.ToString()!)
+                        {
+                            IsEnum = field.Type.TypeKind == TypeKind.Enum,
+                            IsNullable = field.Type.NullableAnnotation == NullableAnnotation.Annotated
+                        });
+                    }
                 }
 
                 cloneClasses.Add(cloneClass);
@@ -158,100 +163,66 @@ internal class Program
             }
         }
 
-        sb.AppendLine("""
+        code.AddLine("""
             using System.Diagnostics.CodeAnalysis;
             using System.IO;
             namespace Playnite;
-
-            #nullable enable
 
             """);
 
         foreach (var cls in collectionClasses)
         {
-            sb.AppendLine($$"""
-                public partial class {{cls.Name}}Collection : DatabaseCollection<{{cls.Name}}>
-                {
-                    public {{cls.Name}}Collection(Library lib, CustomSqliteDb db) : base(lib, db, {{cls.UseMemoryCache.ToString().ToLower()}})
-                    {
-                    }
-                }
-                """);
-            sb.AppendLine();
+            using var _ = code.MakeScope($"public partial class {cls.Name}Collection : DatabaseCollection<{cls.Name}>");
+            using var __ = code.MakeScope($"public {cls.Name}Collection(Library lib, CustomSqliteDb db) : base(lib, db, {cls.UseMemoryCache.ToString().ToLower()})");
         }
 
         // Collection members
+        using (var _ = code.MakeScope("public partial class Library"))
+        {
+            foreach (var cls in collectionClasses)
+            {
+                code.AddLine($"[AllowNull] public {cls.Name}Collection {ToPlural(cls.Name!)} {{ get; private set; }}");
+            }
 
-        sb.AppendLine($$"""
-                public partial class Library
+            // In use properties
+            foreach (var cls in inuseClasses)
+            {
+                code.AddLine($"public HashSet<Guid> Used{ToPlural(cls.Name!)} {{ get; }} = new();");
+                code.AddLine($"public event EventHandler? {ToPlural(cls.Name!)}InUseUpdated;");
+            }
+
+            // LoadCollection
+            using (var __ = code.MakeScope("private void LoadCollections()"))
+            {
+                foreach (var dbName in collectionClasses.GroupBy(a => a.DbName))
                 {
-                """);
+                    code.AddLine($"sqliteDbs.Add(\"{dbName.Key}\", new CustomSqliteDb(Path.Combine(LibraryDir, \"{dbName.Key}.db\")));");
+                }
 
-        foreach (var cls in collectionClasses)
-        {
-            sb.AppendLine($"    [AllowNull] public {cls.Name}Collection {ToPlural(cls.Name!)} {{ get; private set; }}");
+                foreach (var cls in collectionClasses)
+                {
+                    code.AddLine($"{ToPlural(cls.Name!)} = new(this, sqliteDbs[\"{cls.DbName}\"]);");
+                }
+            }
         }
 
-        // In use properties
-        foreach (var cls in inuseClasses)
-        {
-            sb.AppendLine($$"""
-                    public HashSet<Guid> Used{{ToPlural(cls.Name!)}} { get; } = new();
-                    public event EventHandler? {{ToPlural(cls.Name!)}}InUseUpdated;
-                """);
-        }
-
-        // LoadCollection
-
-        sb.AppendLine($$"""
-                    private void LoadCollections()
-                    {
-                """);
-
-        foreach (var dbName in collectionClasses.GroupBy(a => a.DbName))
-        {
-            sb.AppendLine($"        sqliteDbs.Add(\"{dbName.Key}\", new CustomSqliteDb(Path.Combine(LibraryDir, \"{dbName.Key}.db\")));");
-        }
-
-        foreach (var cls in collectionClasses)
-        {
-            sb.AppendLine($"        {ToPlural(cls.Name!)} = new(this, sqliteDbs[\"{cls.DbName}\"]);");
-        }
-
-        sb.AppendLine("    }");
-        sb.AppendLine("}");
-
-        File.WriteAllText(collectionOutFile, sb.ToString());
+        File.WriteAllText(collectionOutFile, code.ToString());
 
         // Models GetCopy
-
-        sb = new();
-        sb.AppendLine("""
+        code = new CodeGen();
+        code.AddLine("""
             namespace Playnite;
 
-            #nullable enable
             #pragma warning disable CS1591
 
             """);
 
         foreach (var cls in cloneClasses)
         {
-            sb.AppendLine($$"""
-            public partial class {{cls.Name}} : ICopyable<{{cls.Name}}>
-            {
-                public {{cls.Name}} GetCopy()
-                {
-                    var copy = new {{cls.Name}}();
-            """);
+            using var _ = code.MakeScope($"public partial class {cls.Name} : ICopyable<{cls.Name}>");
+            using var __ = code.MakeScope($"public {cls.Name} GetCopy()");
 
-            if (cls.BaseType == "DatabaseObject")
-            {
-                sb.AppendLine("""
-                            copy.Name = Name;
-                            copy.Id = Id;
-                    """);
-            }
-
+            code.AddLine($"var copy = new {cls.Name}();");
             foreach (var member in cls.Members)
             {
                 var propName = string.Concat(member.Name[0].ToString().ToUpper(), member.Name.AsSpan(1));
@@ -261,16 +232,16 @@ internal class Program
                     {
                         if (member.IsNullable)
                         {
-                            sb.AppendLine($"        copy.{propName} = {propName} is null ? null : new({propName});");
+                            code.AddLine($"copy.{propName} = {propName} is null ? null : new({propName});");
                         }
                         else
                         {
-                            sb.AppendLine($"        copy.{propName} = new({propName});");
+                            code.AddLine($"copy.{propName} = new({propName});");
                         }
                     }
                     else if (cloneClasses.FirstOrDefault(a => "Playnite." + a.Name == member.GenericType) != null)
                     {
-                        sb.AppendLine($"        copy.{propName} = {propName}?.Select(a => a.GetCopy()).To{member.GenericTypeRoot}();");
+                        code.AddLine($"copy.{propName} = {propName}?.Select(a => a.GetCopy()).To{member.GenericTypeRoot}();");
                     }
                     else
                     {
@@ -279,15 +250,15 @@ internal class Program
                 }
                 else if (knownStructs.Contains(member.Type) || member.IsEnum)
                 {
-                    sb.AppendLine($"        copy.{propName} = {propName};");
+                    code.AddLine($"copy.{propName} = {propName};");
                 }
                 else if (cloneClasses.FirstOrDefault(a => "Playnite." + a.Name == member.Type) != null)
                 {
-                    sb.AppendLine($"        copy.{propName} = {propName}{(member.IsNullable ? "?" : string.Empty)}.GetCopy();");
+                    code.AddLine($"copy.{propName} = {propName}{(member.IsNullable ? "?" : string.Empty)}.GetCopy();");
                 }
                 else if (member.Type == "PartialDate")
                 {
-                    sb.AppendLine($"        copy.{propName} = {propName}{(member.IsNullable ? "?" : string.Empty)}.GetCopy();");
+                    code.AddLine($"copy.{propName} = {propName}{(member.IsNullable ? "?" : string.Empty)}.GetCopy();");
                 }
                 else
                 {
@@ -295,69 +266,62 @@ internal class Program
                 }
             }
 
-            sb.AppendLine("""
-                        return copy;
-                    }
-                """);
-            sb.AppendLine("}");
-            sb.AppendLine();
+            code.AddLine("return copy;");
         }
 
-        File.WriteAllText(@"c:\Devel\Playnite\source7\PlayniteSDK\Models\PlayniteModels.generated.cs", sb.ToString());
+        File.WriteAllText(@"c:\Devel\Playnite\source7\PlayniteSDK\Models\PlayniteModels.generated.cs", code.ToString());
 
-        sb = new();
-        sb.AppendLine("""
+        code = new CodeGen();
+        code.AddLine("""
             namespace Playnite.Tests;
 
-            public partial class PlayniteModelsTests
-            {
-                [Test]
-                public void GetCopyTests()
-                {
             """);
 
-        foreach (var cls in cloneClasses)
+        using (var _ = code.MakeScope($"public partial class PlayniteModelsTests"))
         {
-            sb.AppendLine($"        GetCopyTest<{cls.Name}>();");
+            using var __ = code.MakeScope($"[Test] public void GetCopyTests()");
+            foreach (var cls in cloneClasses)
+            {
+                code.AddLine($"GetCopyTest<{cls.Name}>();");
+            }
         }
 
-        sb.AppendLine("    }");
-        sb.AppendLine("}");
-
-        File.WriteAllText(@"C:\Devel\Playnite\source7\Tests\Playnite.Tests\App\PlayniteModels.Tests.generated.cs", sb.ToString());
+        File.WriteAllText(@"C:\Devel\Playnite\source7\Tests\Playnite.Tests\App\PlayniteModels.Tests.generated.cs", code.ToString());
 
         // Generate public static dialogs class
         var dialogsMethods = ParseIDialogs(@"C:\Devel\Playnite\source7\PlayniteSDK\IDialogs.cs");
 
-        sb = new();
-        sb.AppendLine("""
-            using System.Diagnostics.CodeAnalysis;
-            #nullable enable
-            namespace Playnite;
+        code = new CodeGen();
+        code.AddLine("""
+        using System.Diagnostics.CodeAnalysis;
+        namespace Playnite;
 
-            public partial class Dialogs
-            {
+        """);
+
+        using (var _ = code.MakeScope($"public partial class Dialogs"))
+        {
+            code.AddLine("""
                 [AllowNull] public static IDialogs DialogsHandler { get; private set; }
 
                 internal static void SetHandler(IDialogs factory)
                 {
                     DialogsHandler = factory;
                 }
-            """);
+                """);
 
-        foreach (var method in dialogsMethods)
-        {
-            sb.AppendLine($$"""
+            foreach (var method in dialogsMethods)
+            {
+                code.AddLine($$"""
 
                 public static {{method.Declaration}}
                 {
                     {{(method.ReturnType == "void" ? string.Empty : "return ")}}DialogsHandler.{{method.Name}}({{string.Join(", ", method.Params!)}});
                 }
-            """);
+                """);
+            }
         }
 
-        sb.AppendLine("}");
-        File.WriteAllText(@"C:\Devel\Playnite\source7\Playnite\Dialogs.generated.cs", sb.ToString());
+        File.WriteAllText(@"C:\Devel\Playnite\source7\Playnite\Dialogs.generated.cs", code.ToString());
     }
 
     public class IterfaceMethod
@@ -450,5 +414,18 @@ internal class Program
         }
 
         return input + "s";
+    }
+}
+
+public static class Extensions
+{
+    public static IEnumerable<ITypeSymbol> GetBaseTypesAndThis(this ITypeSymbol type)
+    {
+        var current = type;
+        while (current != null)
+        {
+            yield return current;
+            current = current.BaseType;
+        }
     }
 }

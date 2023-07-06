@@ -1,8 +1,7 @@
+#nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 namespace Playnite;
-
-#nullable enable
 
 public partial class GameCollection : DatabaseCollection<Game>
 {

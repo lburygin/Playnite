@@ -5,39 +5,6 @@
 
         #region Files
 
-
-        public string AddFile(MetadataFile file, Guid parentId, bool isImage)
-        {
-            if (!file.HasImageData)
-            {
-                logger.Error("Cannot add file to database, no file data provided.");
-                return null;
-            }
-
-            string localPath = null;
-            try
-            {
-                localPath = file.GetLocalFile(CancellationToken.None);
-            }
-            catch (Exception e)
-            {
-                logger.Error(e, "Failed to get local file from metadata file");
-            }
-
-            if (localPath.IsNullOrEmpty())
-            {
-                return null;
-            }
-
-            var finalFile = AddFile(localPath, parentId, isImage);
-            if (localPath.StartsWith(PlaynitePaths.TempPath))
-            {
-                FileSystem.DeleteFile(localPath);
-            }
-
-            return finalFile;
-        }       
-
         #endregion Files
         private Game GameInfoToGame(GameMetadata game, Guid pluginId)
         {

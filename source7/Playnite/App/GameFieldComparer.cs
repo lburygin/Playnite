@@ -16,11 +16,6 @@ public partial class GameFieldComparer : IEqualityComparer<string>
 
     public static bool StringEquals(string? x, string? y)
     {
-        if (x.IsNullOrEmpty() && y.IsNullOrEmpty())
-        {
-            return true;
-        }
-
         if (x.IsNullOrEmpty() || y.IsNullOrEmpty())
         {
             return false;

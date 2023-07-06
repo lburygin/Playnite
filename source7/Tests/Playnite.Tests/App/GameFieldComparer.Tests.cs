@@ -4,7 +4,7 @@
 public class GameFieldComparerTests
 {
     [Test]
-    public void CompareTest()
+    public void ComparerTest()
     {
         Assert.IsTrue(GameFieldComparer.StringEquals("Single Player", "Single Player"));
         Assert.IsTrue(GameFieldComparer.StringEquals("Single-Player", "Single Player"));
@@ -14,7 +14,7 @@ public class GameFieldComparerTests
         Assert.IsFalse(GameFieldComparer.StringEquals("SingleaPlayer", "Single Player"));
         Assert.IsFalse(GameFieldComparer.StringEquals("Single:Player", "Single Player"));
 
-        Assert.IsTrue(GameFieldComparer.StringEquals(null, null));
+        Assert.IsFalse(GameFieldComparer.StringEquals(null, null));
         Assert.IsFalse(GameFieldComparer.StringEquals(null, "Single Player"));
         Assert.IsFalse(GameFieldComparer.StringEquals("Single:Player", null));
     }

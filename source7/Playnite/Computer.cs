@@ -1,12 +1,11 @@
 ﻿using Microsoft.Win32;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Diagnostics;
 using Vanara.PInvoke;
 using System.Management;
 using static Vanara.PInvoke.Gdi32;
 using static Vanara.PInvoke.User32;
+using System.Text.RegularExpressions;
 
 namespace Playnite;
 
@@ -404,5 +403,57 @@ public static class Computer
         }
 
         return false;
+    }
+
+    public static void OpenUrl(Link link)
+    {
+        OpenUrl(link.Url!);
+    }
+
+    public static void OpenUrl(Uri uri)
+    {
+        OpenUrl(uri.OriginalString);
+    }
+
+    public static void OpenUrl(string url)
+    {
+        if (url.IsNullOrWhiteSpace())
+        {
+            throw new Exception("No URL was given.");
+        }
+
+        url = url.Replace("{AppBranch}", AppConfig.AppBranch, StringComparison.OrdinalIgnoreCase);
+        if (!Regex.IsMatch(url, @"^.*:\/\/"))
+        {
+            if (Paths.IsFullPath(url))
+            {
+                // Do nothing, some people put local file paths to link fields: #2562
+            }
+            else
+            {
+                url = "http://" + url;
+            }
+        }
+
+        ProcessStarter.StartUrl(url);
+    }
+
+    public static void OpenDirectory(string dirPath, string openCommand)
+    {
+        try
+        {
+            if (openCommand.IsNullOrWhiteSpace())
+            {
+                ProcessStarter.StartProcess("explorer.exe", $"\"{dirPath}\"");
+            }
+            else
+            {
+                ProcessStarter.ShellExecute(openCommand.Replace("{Dir}", dirPath, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+        catch (Exception e) when (!AppConfig.ThrowAllErrors)
+        {
+            logger.Error(e, $"Failed to open directory.\n{e.Message}");
+        }
     }
 }

@@ -29,7 +29,7 @@ public static class ListExtensions
     {
         if (source is IList<T> list)
         {
-            return list?.Count > 0;
+            return list.Count > 0;
         }
 
         return source?.Any() == true;

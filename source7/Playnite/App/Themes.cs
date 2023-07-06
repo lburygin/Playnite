@@ -4,7 +4,7 @@ namespace Playnite;
 
 public class Theme
 {
-    public ThemeManifest Manifest { get; }
+    public LocalThemeManifest Manifest { get; }
     public bool IsBuiltInTheme { get; }
     public bool IsCustomTheme => !IsBuiltInTheme;
     public bool IsCompatible { get; }
@@ -14,7 +14,7 @@ public class Theme
 
     public Theme(string manifestPath)
     {
-        Manifest = Serialization.FromYaml<ThemeManifest>(File.ReadAllText(manifestPath));
+        Manifest = Serialization.FromYaml<LocalThemeManifest>(File.ReadAllText(manifestPath));
         if (Manifest.Id.IsNullOrWhiteSpace())
         {
             throw new Exception("Addon ID is missing.");

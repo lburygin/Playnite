@@ -61,11 +61,6 @@ public class ExpandableVariables
     public const string PluginId = "{PluginId}";
 
     /// <summary>
-    /// Gets variable for game's version.
-    /// </summary>
-    public const string Version = "{Version}";
-
-    /// <summary>
     /// Gets directory path of parent emulator object.
     /// </summary>
     public const string EmulatorDirectory = "{EmulatorDir}";

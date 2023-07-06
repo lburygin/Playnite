@@ -89,7 +89,7 @@ public static class ProcessStarter
             info.Verb = "runas";
         }
 
-        return Process.Start(info) ?? throw new Exception("Failed to start process");
+        return Process.Start(info) ?? throw new Exception("Failed to start process, no process was started.");
     }
 
     public static int StartProcessWait(string path, string arguments, bool noWindow = false)
@@ -120,7 +120,7 @@ public static class ProcessStarter
             info.UseShellExecute = false;
         }
 
-        using (var proc = Process.Start(info) ?? throw new Exception("Failed to start process"))
+        using (var proc = Process.Start(info) ?? throw new Exception("Failed to start process, no process was started."))
         {
             proc.WaitForExit();
             return proc.ExitCode;

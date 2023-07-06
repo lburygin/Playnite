@@ -194,6 +194,192 @@ public interface ICopyable<T>
     T GetCopy();
 }
 
+public abstract class MetadataProperty
+{
+}
+
+public class MetadataIdProperty : MetadataProperty, IEquatable<MetadataIdProperty>
+{
+    public Guid Id { get; }
+
+    public MetadataIdProperty(Guid dbId)
+    {
+        if (dbId == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(dbId));
+        }
+
+        Id = dbId;
+    }
+
+    public override string ToString()
+    {
+        return Id.ToString();
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as MetadataIdProperty);
+    }
+
+    public bool Equals(MetadataIdProperty? other)
+    {
+        return Id == other?.Id;
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
+}
+
+public class MetadataNameProperty : MetadataProperty, IEquatable<MetadataNameProperty>
+{
+    public string Name { get; }
+
+    public MetadataNameProperty(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentNullException(nameof(name));
+        }
+
+        Name = name;
+    }
+
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as MetadataNameProperty);
+    }
+
+    public bool Equals(MetadataNameProperty? other)
+    {
+        return string.Equals(Name, other?.Name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public override int GetHashCode()
+    {
+        return Name.GetHashCode(StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+public class MetadataSpecProperty : MetadataProperty, IEquatable<MetadataSpecProperty>
+{
+    public string Id { get; }
+
+    public MetadataSpecProperty(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            throw new ArgumentNullException(nameof(id));
+        }
+
+        Id = id;
+    }
+
+    public override string ToString()
+    {
+        return Id;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as MetadataSpecProperty);
+    }
+
+    public bool Equals(MetadataSpecProperty? other)
+    {
+        return string.Equals(Id, other?.Id, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode(StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+public class MetadataFile
+{
+    public bool HasData => (!string.IsNullOrWhiteSpace(FileName) && Content != null) || !string.IsNullOrWhiteSpace(Path);
+    public string? FileName { get; set; }
+    public byte[]? Content { get; set; }
+    public string? Path { get; set; }
+
+    public MetadataFile()
+    {
+    }
+
+    public MetadataFile(string path)
+    {
+        FileName = System.IO.Path.GetFileName(path);
+        Path = path;
+    }
+
+    public MetadataFile(string name, byte[] data)
+    {
+        FileName = name;
+        Content = data;
+    }
+
+    public MetadataFile(string name, byte[] data, string originalUrl)
+    {
+        FileName = name;
+        Content = data;
+        Path = originalUrl;
+    }
+}
+
+public partial class ImportableGame
+{
+    public class GameSession
+    {
+        public uint Length { get; set; }
+        public DateTime? Date { get; set; }
+    }
+
+    public string? Name { get; set; }
+    public string? GameId { get; set; }
+    public string? SortingName { get; set; }
+    public string? Description { get; set; }
+    public string? Notes { get; set; }
+    public PartialDate? ReleaseDate { get; set; }
+    public DateTime? LastPlayed { get; set; }
+    public ulong TotalPlayCount { get; set; }
+    public string? Manual { get; set; }
+    public List<Link>? Links { get; set; }
+    public MetadataFile? Icon { get; set; }
+    public MetadataFile? Cover { get; set; }
+    public MetadataFile? Background { get; set; }
+    public bool EnableSystemHdr { get; set; }
+    public bool Hidden { get; set; }
+    public bool Favorite { get; set; }
+    public uint? UserScore { get; set; }
+    public uint? CriticScore { get; set; }
+    public uint? CommunityScore { get; set; }
+    public HashSet<MetadataProperty>? Genres { get; set; }
+    public HashSet<MetadataProperty>? Platforms { get; set; }
+    public HashSet<MetadataProperty>? Publishers { get; set; }
+    public HashSet<MetadataProperty>? Developers { get; set; }
+    public HashSet<MetadataProperty>? Categories { get; set; }
+    public HashSet<MetadataProperty>? Tags { get; set; }
+    public HashSet<MetadataProperty>? Features { get; set; }
+    public HashSet<MetadataProperty>? Series { get; set; }
+    public HashSet<MetadataProperty>? AgeRatings { get; set; }
+    public HashSet<MetadataProperty>? Regions { get; set; }
+    public MetadataProperty? Source { get; set; }
+    public MetadataProperty? CompletionStatus { get; set; }
+    public List<GameSession>? Sessions { get; set; }
+    public bool IsInstalled { get; set; }
+    public string? InstallDirectory { get; set; }
+    public List<GameRom>? Roms { get; set; }
+    public List<GameAction>? Actions { get; set; }
+}
+
 [AddCopyMethod]
 [LibraryCollection(UseMemoryCache = true, DbName = nameof(Game))]
 public partial class Game : DatabaseObject
@@ -352,9 +538,14 @@ public partial class GameTrackingOptions : ObservableObject
     }
 }
 
+public abstract partial class GameAction : DatabaseObject
+{
+    [ObservableProperty] private bool isPlayAction;
+}
+
 [AddCopyMethod]
 [LibraryCollection(UseMemoryCache = false, DbName = nameof(Game))]
-public partial class FileGameAction : DatabaseObject
+public partial class FileGameAction : GameAction
 {
     [ObservableProperty] private string? path;
     [ObservableProperty] private string? arguments;
@@ -369,7 +560,7 @@ public partial class FileGameAction : DatabaseObject
 
 [AddCopyMethod]
 [LibraryCollection(UseMemoryCache = false, DbName = nameof(Game))]
-public partial class UrlGameAction : DatabaseObject
+public partial class UrlGameAction : GameAction
 {
     [ObservableProperty] private string? url;
     [ObservableProperty] private GameTrackingOptions trackingOptions = new();
@@ -382,7 +573,7 @@ public partial class UrlGameAction : DatabaseObject
 
 [AddCopyMethod]
 [LibraryCollection(UseMemoryCache = false, DbName = nameof(Game))]
-public partial class EmulatorGameAction : DatabaseObject
+public partial class EmulatorGameAction : GameAction
 {
     [ObservableProperty] private string? additionalArguments;
     [ObservableProperty] private bool overrideDefaultArgs;

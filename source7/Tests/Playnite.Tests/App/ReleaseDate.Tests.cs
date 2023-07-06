@@ -45,7 +45,7 @@ public class ReleaseDateTests
             Serialization.ToJson(new PartialDate(2001, 2, 3)));
 
         Assert.AreEqual(
-            new PartialDate(2001, 2, 3).GetClone(),
+            new PartialDate(2001, 2, 3).GetCopy(),
             new PartialDate(2001, 2, 3));
     }
 }

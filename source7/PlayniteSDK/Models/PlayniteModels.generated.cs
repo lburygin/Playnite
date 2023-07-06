@@ -1,6 +1,6 @@
+#nullable enable
 namespace Playnite;
 
-#nullable enable
 #pragma warning disable CS1591
 
 public partial class Game : ICopyable<Game>
@@ -8,8 +8,6 @@ public partial class Game : ICopyable<Game>
     public Game GetCopy()
     {
         var copy = new Game();
-        copy.Name = Name;
-        copy.Id = Id;
         copy.SortingName = SortingName;
         copy.ReleaseDate = ReleaseDate?.GetCopy();
         copy.LastActivity = LastActivity;
@@ -41,6 +39,8 @@ public partial class Game : ICopyable<Game>
         copy.RegionIds = RegionIds is null ? null : new(RegionIds);
         copy.SourceId = SourceId;
         copy.CompletionStatusId = CompletionStatusId;
+        copy.Name = Name;
+        copy.Id = Id;
         return copy;
     }
 }
@@ -50,8 +50,6 @@ public partial class GameVariant : ICopyable<GameVariant>
     public GameVariant GetCopy()
     {
         var copy = new GameVariant();
-        copy.Name = Name;
-        copy.Id = Id;
         copy.Name = Name;
         copy.GameId = GameId;
         copy.PluginId = PluginId;
@@ -69,6 +67,8 @@ public partial class GameVariant : ICopyable<GameVariant>
         copy.GameActions = GameActions is null ? null : new(GameActions);
         copy.SessionIds = SessionIds is null ? null : new(SessionIds);
         copy.AchievementsId = AchievementsId;
+        copy.Name = Name;
+        copy.Id = Id;
         return copy;
     }
 }
@@ -100,9 +100,9 @@ public partial class GameDescription : ICopyable<GameDescription>
     public GameDescription GetCopy()
     {
         var copy = new GameDescription();
+        copy.Text = Text;
         copy.Name = Name;
         copy.Id = Id;
-        copy.Text = Text;
         return copy;
     }
 }
@@ -112,9 +112,9 @@ public partial class GameNote : ICopyable<GameNote>
     public GameNote GetCopy()
     {
         var copy = new GameNote();
+        copy.Text = Text;
         copy.Name = Name;
         copy.Id = Id;
-        copy.Text = Text;
         return copy;
     }
 }
@@ -124,14 +124,14 @@ public partial class GameScripts : ICopyable<GameScripts>
     public GameScripts GetCopy()
     {
         var copy = new GameScripts();
-        copy.Name = Name;
-        copy.Id = Id;
         copy.UseGlobalPostScript = UseGlobalPostScript;
         copy.UseGlobalPreScript = UseGlobalPreScript;
         copy.UseGlobalGameStartedScript = UseGlobalGameStartedScript;
         copy.PreScript = PreScript;
         copy.PostScript = PostScript;
         copy.GameStartedScript = GameStartedScript;
+        copy.Name = Name;
+        copy.Id = Id;
         return copy;
     }
 }
@@ -174,12 +174,13 @@ public partial class FileGameAction : ICopyable<FileGameAction>
     public FileGameAction GetCopy()
     {
         var copy = new FileGameAction();
-        copy.Name = Name;
-        copy.Id = Id;
         copy.Path = Path;
         copy.Arguments = Arguments;
         copy.WorkingDir = WorkingDir;
         copy.TrackingOptions = TrackingOptions.GetCopy();
+        copy.IsPlayAction = IsPlayAction;
+        copy.Name = Name;
+        copy.Id = Id;
         return copy;
     }
 }
@@ -189,10 +190,11 @@ public partial class UrlGameAction : ICopyable<UrlGameAction>
     public UrlGameAction GetCopy()
     {
         var copy = new UrlGameAction();
-        copy.Name = Name;
-        copy.Id = Id;
         copy.Url = Url;
         copy.TrackingOptions = TrackingOptions.GetCopy();
+        copy.IsPlayAction = IsPlayAction;
+        copy.Name = Name;
+        copy.Id = Id;
         return copy;
     }
 }
@@ -202,13 +204,14 @@ public partial class EmulatorGameAction : ICopyable<EmulatorGameAction>
     public EmulatorGameAction GetCopy()
     {
         var copy = new EmulatorGameAction();
-        copy.Name = Name;
-        copy.Id = Id;
         copy.AdditionalArguments = AdditionalArguments;
         copy.OverrideDefaultArgs = OverrideDefaultArgs;
         copy.IsPlayAction = IsPlayAction;
         copy.EmulatorId = EmulatorId;
         copy.EmulatorProfileId = EmulatorProfileId;
+        copy.IsPlayAction = IsPlayAction;
+        copy.Name = Name;
+        copy.Id = Id;
         return copy;
     }
 }
@@ -218,9 +221,9 @@ public partial class ScriptGameAction : ICopyable<ScriptGameAction>
     public ScriptGameAction GetCopy()
     {
         var copy = new ScriptGameAction();
+        copy.Script = Script;
         copy.Name = Name;
         copy.Id = Id;
-        copy.Script = Script;
         return copy;
     }
 }
@@ -241,12 +244,12 @@ public partial class AppSoftware : ICopyable<AppSoftware>
     public AppSoftware GetCopy()
     {
         var copy = new AppSoftware();
-        copy.Name = Name;
-        copy.Id = Id;
         copy.Icon = Icon;
         copy.Arguments = Arguments;
         copy.Path = Path;
         copy.WorkingDir = WorkingDir;
+        copy.Name = Name;
+        copy.Id = Id;
         return copy;
     }
 }
@@ -322,12 +325,12 @@ public partial class Platform : ICopyable<Platform>
     public Platform GetCopy()
     {
         var copy = new Platform();
-        copy.Name = Name;
-        copy.Id = Id;
         copy.SpecificationId = SpecificationId;
         copy.Icon = Icon;
         copy.Cover = Cover;
         copy.Background = Background;
+        copy.Name = Name;
+        copy.Id = Id;
         return copy;
     }
 }
@@ -337,9 +340,9 @@ public partial class Region : ICopyable<Region>
     public Region GetCopy()
     {
         var copy = new Region();
+        copy.SpecificationId = SpecificationId;
         copy.Name = Name;
         copy.Id = Id;
-        copy.SpecificationId = SpecificationId;
         return copy;
     }
 }
@@ -371,12 +374,11 @@ public partial class ImportExclusionItem : ICopyable<ImportExclusionItem>
     public ImportExclusionItem GetCopy()
     {
         var copy = new ImportExclusionItem();
-        copy.Name = Name;
-        copy.Id = Id;
         copy.GameId = GameId;
         copy.LibraryId = LibraryId;
         copy.LibraryName = LibraryName;
+        copy.Name = Name;
+        copy.Id = Id;
         return copy;
     }
 }
-
