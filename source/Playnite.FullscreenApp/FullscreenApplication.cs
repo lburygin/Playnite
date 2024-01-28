@@ -14,10 +14,10 @@ using Playnite.SDK.Models;
 using Playnite.WebView;
 using Playnite.Windows;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
+using System.Runtime.Remoting.Contexts;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -290,20 +290,27 @@ namespace Playnite.FullscreenApp
 
         private void SDLEventLoop()
         {
+            var context = SynchronizationContext.Current;
+
             Task.Run(async () =>
             {
                 while (!exitSDLEventLoop)
                 {
                     while (SDL_PollEvent(out var sdlEvent) == 1)
                     {
-                        if (sdlEvent.type == SDL_EventType.SDL_CONTROLLERDEVICEADDED)
+                        switch (sdlEvent.type)
                         {
-                            GameController?.AddController(sdlEvent.cdevice.which);
-                        }
+                            case SDL_EventType.SDL_CONTROLLERDEVICEADDED when AppSettings.Fullscreen.ReloadGameControllersOnAdd:
+                                context.Send(_ => ReloadInputs(), null);
+                                break;
 
-                        if (sdlEvent.type == SDL_EventType.SDL_CONTROLLERDEVICEREMOVED)
-                        {
-                            GameController?.RemoveController(sdlEvent.cdevice.which);
+                            case SDL_EventType.SDL_CONTROLLERDEVICEADDED:
+                                GameController?.AddController(sdlEvent.cdevice.which);
+                                break;
+
+                            case SDL_EventType.SDL_CONTROLLERDEVICEREMOVED:
+                                GameController?.RemoveController(sdlEvent.cdevice.which);
+                                break;
                         }
                     }
 
@@ -337,6 +344,30 @@ namespace Playnite.FullscreenApp
             catch (Exception e) when (!PlayniteEnvironment.ThrowAllErrors)
             {
                 logger.Error(e, "Failed intitialize game controller devices.");
+            }
+        }
+
+        private void ReloadInputs()
+        {
+            if (!sdlInitialized || GameController == null)
+            {
+                return;
+            }
+
+            try
+            {      
+                GameController.RemoveAllControllers();
+
+                SDL_Quit();
+                SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO);
+                SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
+                SDL_GameControllerEventState(SDL_IGNORE);
+
+                GameController.LoadControllers();
+            }
+            catch (Exception e) when (!PlayniteEnvironment.ThrowAllErrors)
+            {
+                logger.Error(e, "Failed to reload game controller devices.");
             }
         }
 

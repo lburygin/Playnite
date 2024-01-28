@@ -443,6 +443,21 @@ namespace Playnite
             }
         }
 
+        private bool reloadGameControllersOnAdd = false;
+        public bool ReloadGameControllersOnAdd
+        {
+            get
+            {
+                return reloadGameControllersOnAdd;
+            }
+
+            set
+            {
+                reloadGameControllersOnAdd = value;
+                OnPropertyChanged();
+            }
+        }
+
         private List<string> disabledGameControllers = new List<string>();
         public List<string> DisabledGameControllers
         {
