@@ -14,9 +14,7 @@ using Playnite.SDK.Models;
 using Playnite.WebView;
 using Playnite.Windows;
 using System;
-using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -298,19 +296,18 @@ namespace Playnite.FullscreenApp
                 {
                     while (SDL_PollEvent(out var sdlEvent) == 1)
                     {
-                        switch (sdlEvent.type)
+                        if (sdlEvent.type == SDL_EventType.SDL_CONTROLLERDEVICEADDED)
                         {
-                            case SDL_EventType.SDL_CONTROLLERDEVICEADDED when AppSettings.Fullscreen.ReloadGameControllersOnAdd:
-                                context.Send(_ => ReloadInputs(), null);
-                                break;
+                            // there is a bug in SDL library - probably some DEVICEREMOVED events don't fire or DEVICEADDED events fire twice
+                            // and it ends up showing not actual list for user and processing inputs from disposed controllers. 
+                            // this is the case with Lenovo Legion Go controllers. So I just reinit SDL gamecontroller subsystem on adding new controller.
+                            // didn't notice any negative impact of this comparing to GameController.AddController variant (obviously second is faster, but not noticeable anyway)
+                            context.Send(_ => ReloadInputs(), null);
+                        }
 
-                            case SDL_EventType.SDL_CONTROLLERDEVICEADDED:
-                                GameController?.AddController(sdlEvent.cdevice.which);
-                                break;
-
-                            case SDL_EventType.SDL_CONTROLLERDEVICEREMOVED:
-                                GameController?.RemoveController(sdlEvent.cdevice.which);
-                                break;
+                        if (sdlEvent.type == SDL_EventType.SDL_CONTROLLERDEVICEREMOVED)
+                        {
+                            GameController?.RemoveController(sdlEvent.cdevice.which);
                         }
                     }
 
@@ -318,6 +315,30 @@ namespace Playnite.FullscreenApp
                     await Task.Delay(16);
                 }
             });
+        }
+
+        private void ReloadInputs()
+        {
+            if (!sdlInitialized || GameController == null)
+            {
+                return;
+            }
+
+            try
+            {
+                GameController.RemoveAllControllers();
+
+                SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
+                SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
+                SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
+                SDL_GameControllerEventState(SDL_IGNORE);
+
+                GameController.LoadControllers();
+            }
+            catch (Exception e) when (!PlayniteEnvironment.ThrowAllErrors)
+            {
+                logger.Error(e, "Failed to reload SDL");
+            }
         }
 
         public void SetupInputs()
@@ -347,29 +368,6 @@ namespace Playnite.FullscreenApp
             }
         }
 
-        private void ReloadInputs()
-        {
-            if (!sdlInitialized || GameController == null)
-            {
-                return;
-            }
-
-            try
-            {      
-                GameController.RemoveAllControllers();
-
-                SDL_Quit();
-                SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO);
-                SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
-                SDL_GameControllerEventState(SDL_IGNORE);
-
-                GameController.LoadControllers();
-            }
-            catch (Exception e) when (!PlayniteEnvironment.ThrowAllErrors)
-            {
-                logger.Error(e, "Failed to reload game controller devices.");
-            }
-        }
 
         public void UpdateConfirmCancelBindings()
         {

@@ -278,7 +278,17 @@ namespace Playnite.Input
             var controller = SDL_GameControllerOpen(joyIndex);
             var joystick = SDL_GameControllerGetJoystick(controller);
             var con = new LoadedGameController(controller, joystick, SDL_JoystickInstanceID(joystick), SDL_JoystickPath(joystick), SDL_JoystickName(joystick));
-            con.Enabled = !settings.Fullscreen.DisabledGameControllers.Contains(con.Path);
+
+            if (settings.Fullscreen.UseOnlyLastAddedController)
+            {
+                con.Enabled = true;
+                Controllers.ForEach(x => x.Enabled = false);
+            }
+            else
+            {
+                con.Enabled = !settings.Fullscreen.DisabledGameControllers.Contains(con.Path);
+            }
+     
             Controllers.Add(con);
 
             logger.Info($"added controller index {con.InstanceId}, {con.Name}");

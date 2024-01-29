@@ -443,21 +443,6 @@ namespace Playnite
             }
         }
 
-        private bool reloadGameControllersOnAdd = false;
-        public bool ReloadGameControllersOnAdd
-        {
-            get
-            {
-                return reloadGameControllersOnAdd;
-            }
-
-            set
-            {
-                reloadGameControllersOnAdd = value;
-                OnPropertyChanged();
-            }
-        }
-
         private List<string> disabledGameControllers = new List<string>();
         public List<string> DisabledGameControllers
         {
@@ -472,6 +457,22 @@ namespace Playnite
                 OnPropertyChanged();
             }
         }
+
+        private bool useOnlyLastAddedController = false;
+        public bool UseOnlyLastAddedController
+        {
+            get
+            {
+                return useOnlyLastAddedController;
+            }
+
+            set
+            {
+                useOnlyLastAddedController = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         private bool mainMenuShowRestart = true;
         public bool MainMenuShowRestart

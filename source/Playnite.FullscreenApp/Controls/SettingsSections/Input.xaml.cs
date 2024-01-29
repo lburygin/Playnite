@@ -76,10 +76,10 @@ namespace Playnite.FullscreenApp.Controls.SettingsSections
                 UpdateSourceTrigger.PropertyChanged);
 
             BindingTools.SetBinding(
-                ToggleReloadGameControllersOnAdd,
+                ToggleUseOnlyLastAddedController,
                 ToggleButton.IsCheckedProperty,
                 mainModel.AppSettings.Fullscreen,
-                nameof(FullscreenSettings.ReloadGameControllersOnAdd),
+                nameof(FullscreenSettings.UseOnlyLastAddedController),
                 BindingMode.TwoWay,
                 UpdateSourceTrigger.PropertyChanged);
 
